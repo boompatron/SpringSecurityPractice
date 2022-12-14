@@ -45,7 +45,10 @@ public class WebSecurityConfigure extends WebSecurityConfigurerAdapter {
                 .and()
                 .rememberMe()
                 .rememberMeParameter("remember-me")
-                .tokenValiditySeconds(300);
+                .tokenValiditySeconds(300)
+                .and()
+                .requiresChannel()
+                .anyRequest().requiresSecure()
         ;
     }
 
