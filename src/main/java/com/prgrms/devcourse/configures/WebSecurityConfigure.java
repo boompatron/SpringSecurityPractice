@@ -2,6 +2,7 @@ package com.prgrms.devcourse.configures;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -24,9 +25,6 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
-import java.util.ArrayList;
-import java.util.List;
-
 
 @Configuration
 @EnableWebSecurity
@@ -34,9 +32,10 @@ public class WebSecurityConfigure extends WebSecurityConfigurerAdapter {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    private final DataSource dataSource;
+    private DataSource dataSource;
 
-    public WebSecurityConfigure(DataSource dataSource) {
+    @Autowired
+    public void setDataSource(DataSource dataSource){
         this.dataSource = dataSource;
     }
 
@@ -69,30 +68,6 @@ public class WebSecurityConfigure extends WebSecurityConfigurerAdapter {
                 )
                 .getUserDetailsService().setEnableAuthorities(false)
         ;
-    }
-
-    @Bean
-    public UserDetailsService userDetailsService(DataSource dataSource){
-        JdbcDaoImpl jdbcDao = new JdbcDaoImpl();
-        jdbcDao.setDataSource(dataSource);
-        jdbcDao.setEnableAuthorities(false);
-        jdbcDao.setEnableGroups(false);
-        jdbcDao.setUsersByUsernameQuery(
-                "SELECT login_id, passwd, true " +
-                "FROM users " +
-                "WHERE login_id = ?"
-        );
-        jdbcDao.setGroupAuthoritiesByUsernameQuery(
-                "SELECT u.login_id, g.name, p.name " +
-                "FROM " +
-                "users u JOIN groups g ON u.group_id = g.id " +
-                "LEFT JOIN group_permission gp ON g.id = gp.group_id " +
-                "JOIN permissions p ON p.id = gp.permission_id " +
-                "WHERE " +
-                "u.login_id = ?"
-        );
-
-        return jdbcDao;
     }
 
     @Bean
